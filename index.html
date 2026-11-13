@@ -103,6 +103,12 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:42px;height:42px;border-radius:50%;background:#fff;border:4px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:grab}
   input[type=range]::-moz-range-thumb{width:36px;height:36px;border-radius:50%;background:#fff;border:4px solid var(--ink);cursor:grab}
 
+  .other{display:none;margin-top:14px;gap:10px;align-items:stretch;flex-wrap:wrap;animation:in .35s cubic-bezier(.3,1.5,.5,1)}
+  .other.show{display:flex}
+  .other input{flex:1;min-width:200px;background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);
+    font:inherit;font-weight:700;font-size:17px;padding:12px 14px;color:var(--ink)}
+  .other input:focus{outline:none;background:#fffbe0}
+  .other .btn{font-size:20px;padding:10px 22px}
   textarea{width:100%;min-height:110px;background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);
     font:inherit;font-weight:700;font-size:17px;padding:14px 16px;resize:vertical;color:var(--ink)}
   textarea:focus{outline:none;background:#fffbe0}
@@ -165,17 +171,17 @@ const Q = [
       ["🔨","Håndverker","snekker, elektriker, rørlegger …"],["🏗️","Bygg og anlegg","maskin, ingeniør, prosjekt …"],
       ["🏭","Industri / produksjon"],["🚚","Transport / sjåfør"],["🩺","Helse / omsorg"],["🍎","Skole / barnehage"],
       ["💻","Kontor / IT / økonomi"],["🍔","Butikk / service / restaurant"],["🚜","Landbruk / fiske"],
-      ["📚","Elev / student"],["🎣","Pensjonist"],["🦄","Noe helt annet"]]},
+      ["📚","Elev / student"],["🎣","Pensjonist"],["🦄","Noe helt annet","",true]]},
   { id:"fag", title:"Rått! Hvilket fag? 🛠️", sub:"Velg det du driver mest med.", cls:"keep2",
     showIf:a=>BYGG.includes(a.jobb), options:[
       ["🪚","Tømrer / snekker"],["⚡","Elektriker"],["🚿","Rørlegger"],["🎨","Maler"],["🧱","Murer / betong"],
-      ["🚜","Anleggsmaskin"],["🏠","Tak / blikk"],["🔲","Flislegger"],["🌬️","Ventilasjon"],["📐","Ingeniør / leder"],["🛠️","Annet fag"]]},
+      ["🚜","Anleggsmaskin"],["🏠","Tak / blikk"],["🔲","Flislegger"],["🌬️","Ventilasjon"],["📐","Ingeniør / leder"],["🛠️","Annet fag","",true]]},
   { id:"utdanning", title:"Hva tar du? 🎓", showIf:a=>a.jobb==="Elev / student", options:[
       ["🏗️","Yrkesfag – bygg"],["⚡","Yrkesfag – elektro"],["🔩","Annet yrkesfag"],
-      ["📖","Studiespesialisering"],["🎓","Fagskole / ingeniør"],["🧠","Annen høyere utdanning"]]},
+      ["📖","Studiespesialisering"],["🎓","Fagskole / ingeniør"],["🧠","Annen høyere utdanning"],["✍️","Annet","",true]]},
   { id:"hvor", title:"Hvor er du når du hører på JØGGEL?", sub:"Vær ærlig. Vi vet om do-lytterne 🚽", options:[
       ["🚐","I bilen / varebilen"],["🦺","På jobb"],["🏋️","På trening"],["🚽","På do (vi dømmer ikke)"],
-      ["🛏️","I senga"],["🚶","På tur / kollektivt"]]},
+      ["🛏️","I senga"],["🚶","På tur / kollektivt"],["✍️","Annet","",true]]},
   { id:"lytter", title:"Hvor hardcore fan er du?", cls:"one", options:[
       ["🐐","Ekte JØGGEL-veteran – hører alt"],["🔥","Hører ganske ofte"],["🎲","Innimellom, når det passer"],["👶","Helt fersk – første gang!"]]},
   { id:"rating", type:"rate", title:"Hvor rå er JØGGEL?", sub:"Dra i slideren. Vi tåler sannheten (tror vi)." },
@@ -184,9 +190,17 @@ const Q = [
 ];
 
 const REACT = [
-  ["Spikra! 🔨",null],["Sånn ja!",null],["Den satt!",null],["Noterer ✍️",null],
+  ["Spikra! 🔨",null],["Sånn ja!",null],["Den satt!",null],["Noterer ✍️",null],["Rått! 🔥",null],
   ["Helt risgrøt med mørpølse! 🍚",1],["Helt formann du jo!",1],["Sheriffen sjøl! 🤠",1],
-  ["Behh, for en legende! 🐐",0],["Unngår sprøyte denne gangen! 💉",0],["Motsatt av lasaron du jo!",0]];
+  ["Søkkhakkemæta! 😋",1],["Helt Ferrari under juletreet! 🏎️",1],["Fastelaven under beltespenna! 🥳",1],
+  ["Behh, for en legende! 🐐",0],["Unngår sprøyte denne gangen! 💉",0,["kjonn"]],["Motsatt av lasaron du jo!",0],
+  ["Dæven, du er inne på det! 😮",0],["A-lag, rett og slett! ⚽",0],["Formann i pissing foreninga! 👑",0]];
+let lastReact = -1;
+function react(qid){
+  const ok = REACT.map((r,i)=>i).filter(i => i !== lastReact && !(REACT[i][2]||[]).includes(qid));
+  lastReact = ok[Math.floor(Math.random()*ok.length)];
+  bubble(REACT[lastReact][0], REACT[lastReact][1]);
+}
 const RATE = [
   ["😭","BEHHHH!!!! Tynn suppe gutta"],["😢","Helt forbanna lurveleven"],["💉","Vaksinert mot å lage bra pod"],
   ["🍲","Buljongopplegg!"],["🥊","Helt håndgemeng i øra"],["⚽","På vei mot A-lag, men ikke helt der"],
@@ -290,27 +304,53 @@ function render(){
     return;
   }
 
-  const opts = q.options.map((o,n) => `<button class="opt${A[q.id]===o[1]?" sel":""}" data-v="${esc(o[1])}">
+  const cur = A[q.id] || "";
+  const isSel = o => cur === o[1] || (o[3] && cur.startsWith(o[1]+": "));
+  const otherOpt = q.options.find(o => o[3]);
+  const otherTxt = otherOpt && cur.startsWith(otherOpt[1]+": ") ? cur.slice(otherOpt[1].length+2) : "";
+  const opts = q.options.map((o,n) => `<button class="opt${isSel(o)?" sel":""}" data-v="${esc(o[1])}"${o[3]?' data-other="1"':""}>
       <span class="em">${o[0]}</span><span>${o[1]}${o[2]?`<br><small style="font-weight:700;color:#666;font-size:13px">${o[2]}</small>`:""}</span></button>`).join("");
-  swap(`<div class="card">${head}<div class="opts ${q.cls||""}">${opts}</div><div class="row">${backBtn}</div></div>`, () => {
+  swap(`<div class="card">${head}<div class="opts ${q.cls||""}">${opts}</div>
+    ${otherOpt?`<div class="other${otherOpt&&isSel(otherOpt)?" show":""}" id="other"><input id="otherIn" maxlength="120" placeholder="${({jobb:"Hva driver du med?",fag:"Hvilket fag?",utdanning:"Hva tar du?",hvor:"Hvor hører du på oss?"})[q.id]||"Skriv her …"}" value="${esc(otherTxt)}"><button class="btn" id="otherGo">Neste →</button></div>`:""}
+    <div class="row">${backBtn}</div></div>`, () => {
     document.getElementById("back").onclick = back;
-    main.querySelectorAll(".opt").forEach(b => b.onclick = () => pick(q, b));
+    main.querySelectorAll(".opt").forEach(b => b.onclick = () => b.dataset.other ? openOther(q, b) : pick(q, b));
+    if (otherOpt){
+      const go = () => {
+        const txt = document.getElementById("otherIn").value.trim();
+        setAnswer(q, txt ? otherOpt[1]+": "+txt : otherOpt[1]);
+        blip(500,.12); react(q.id); setTimeout(next, 450);
+      };
+      document.getElementById("otherGo").onclick = go;
+      document.getElementById("otherIn").onkeydown = e => { if (e.key === "Enter") go(); };
+    }
   });
 }
 
 let locked = false;
+function setAnswer(q, v){
+  if (A[q.id] !== v){ A[q.id] = v; Q.forEach(x => { if (x.showIf && !x.showIf(A)) delete A[x.id]; }); }
+}
+function openOther(q, b){
+  main.querySelectorAll(".opt").forEach(x => x.classList.remove("sel"));
+  b.classList.add("sel"); blip(380,.08);
+  const o = document.getElementById("other"); o.classList.add("show");
+  const inp = document.getElementById("otherIn"); inp.focus();
+  o.scrollIntoView({behavior:"smooth", block:"center"});
+}
 function pick(q, b){
   if (locked) return; locked = true;
   main.querySelectorAll(".opt").forEach(x => x.classList.remove("sel"));
   b.classList.add("sel");
-  if (A[q.id] !== b.dataset.v){ A[q.id] = b.dataset.v; Q.forEach(x => { if (x.showIf && !x.showIf(A)) delete A[x.id]; }); }
+  setAnswer(q, b.dataset.v);
+  const o = document.getElementById("other"); if (o) o.classList.remove("show");
   blip(440 + Math.random()*200);
-  const r = REACT[Math.floor(Math.random()*REACT.length)]; bubble(r[0], r[1]);
+  react(q.id);
   setTimeout(() => { locked = false; next(); }, 520);
 }
 
 document.addEventListener("keydown", e => {
-  if (idx < 0 || idx >= Q.length || Q[idx].type) return;
+  if (idx < 0 || idx >= Q.length || Q[idx].type || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
   const n = parseInt(e.key, 10), btns = main.querySelectorAll(".opt");
   if (n >= 1 && n <= btns.length) btns[n-1].click();
 });
